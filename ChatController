@@ -1,0 +1,35 @@
+package Agri.AgricultureBot.controller;
+
+import org.springframework.web.bind.annotation.*;
+import Agri.AgricultureBot.dto.ChatRequest;
+import Agri.AgricultureBot.dto.ChatResponse;
+import Agri.AgricultureBot.model.QuestionAnswer;
+import Agri.AgricultureBot.repository.QuestionAnswerRepository;
+
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/chat")
+@CrossOrigin(origins = "*") // optional for Postman/web
+public class ChatController {
+
+    private final QuestionAnswerRepository repository;
+
+    public ChatController(QuestionAnswerRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping
+    public ChatResponse chat(@RequestBody ChatRequest request) {
+        Optional<QuestionAnswer> qaOptional = repository.findByQuestionIgnoreCase(request.getQuestion());
+        String answer;
+
+        if (qaOptional.isPresent()) {
+            answer = qaOptional.get().getAnswer();
+        } else {
+            answer = "Sorry, I don't have an answer for that question.";
+        }
+
+        return new ChatResponse(answer);
+    }
+}
